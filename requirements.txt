@@ -1,0 +1,8 @@
+# Core Python dependencies
+sentence-transformers
+numpy
+streamlit==1.26.0
+
+# System dependencies
+uvicorn==0.24.0  
+fastapi==0.100.0

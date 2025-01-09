@@ -1,0 +1,38 @@
+FROM python:3.10-bullseye
+
+# Install system dependencies for building C++ libraries and SQLite
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    g++ \
+    wget \
+    libsqlite3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and install newer SQLite
+RUN wget https://www.sqlite.org/2024/sqlite-autoconf-3450000.tar.gz \
+    && tar xzf sqlite-autoconf-3450000.tar.gz \
+    && cd sqlite-autoconf-3450000 \
+    && ./configure --prefix=/usr/local \
+    && make \
+    && make install \
+    && cd .. \
+    && rm -rf sqlite-autoconf-3450000* \
+    && ldconfig
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the requirements file
+COPY requirements.txt /app/
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application files
+COPY . /app/
+
+# Expose the application port
+EXPOSE 8401
+
+# Run the FastAPI app
+CMD ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8401"]
